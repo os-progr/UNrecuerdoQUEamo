@@ -729,6 +729,38 @@
             return { x: hx * scale, y: (hy + 3) * scale, z: hz * scale };
         }
 
+        /*
+           TEXTURAS DE EMOJIS DE CORAZONES ROSAS (🩷, 💖, 💕, 💗)
+        */
+        const emojiTextures = [];
+        function getHeartEmojiTexture(variant = 0) {
+            if (emojiTextures[variant]) return emojiTextures[variant];
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 128, 128);
+
+            const emojis = ['🩷', '💖', '💕', '💗'];
+            const emoji = emojis[variant % emojis.length];
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(255, 105, 180, 0.95)';
+            ctx.shadowBlur = 18;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '84px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif';
+            ctx.fillText(emoji, 64, 68);
+            ctx.restore();
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.generateMipmaps = true;
+            texture.minFilter = THREE.LinearMipmapLinearFilter;
+            emojiTextures[variant] = texture;
+            return texture;
+        }
+
         function createCosmicSimulation() {
             galaxyGroup = new THREE.Group();
             nebulaGroup = new THREE.Group();
@@ -762,8 +794,8 @@
                 nebulaGroup.add(nebula);
             }
 
-            // 2. Campo Estelar Cósmico
-            const starCount = 50000;
+            // 2. Campo Estelar Cósmico con Emojis de Corazones Rosas
+            const starCount = 35000;
             const starGeo = new THREE.BufferGeometry();
             const starPos = new Float32Array(starCount * 3);
             const starHP = new Float32Array(starCount * 3);
@@ -784,35 +816,36 @@
                 starHP[i3 + 1] = hp.y;
                 starHP[i3 + 2] = hp.z;
 
-                const bright = 0.45 + Math.random() * 0.55;
-                const temp = Math.random();
-                if (temp > 0.94) {
-                    // Azules brillantes
-                    starCols[i3] = 0.6 * bright; starCols[i3 + 1] = 0.85 * bright; starCols[i3 + 2] = 1 * bright;
-                } else if (temp < 0.08) {
-                    // Rubí y fuego
-                    starCols[i3] = 1 * bright; starCols[i3 + 1] = 0.25 * bright; starCols[i3 + 2] = 0.5 * bright;
-                } else {
-                    // Luz estelar
-                    starCols[i3] = bright; starCols[i3 + 1] = bright * 0.96; starCols[i3 + 2] = bright * 0.92;
-                }
+                const bright = 0.6 + Math.random() * 0.4;
+                starCols[i3] = 1 * bright;
+                starCols[i3 + 1] = 0.65 * bright;
+                starCols[i3 + 2] = 0.85 * bright;
             }
             starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
             starGeo.setAttribute('heartPos', new THREE.BufferAttribute(starHP, 3));
             starGeo.setAttribute('color', new THREE.BufferAttribute(starCols, 3));
 
-            const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
-                size: 1.75, vertexColors: true, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending
-            }));
+            const starsMat = new THREE.PointsMaterial({
+                map: getHeartEmojiTexture(0), // 🩷
+                size: 2.2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.85,
+                alphaTest: 0.01,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            starsMat.baseSize = 2.2;
+            const stars = new THREE.Points(starGeo, starsMat);
             scene.add(stars);
             allParticles.push(stars);
 
-            // 3. Capas del Corazón: Capa Exterior, Músculo Ventricular, Núcleo Lumínico
+            // 3. Capas del Corazón formadas por Emojis de Corazones Rosas
             const ringParams = [
-                { r: 12, dr: 4, c: 0x38bdf8, count: 22000, op: 0.7, s: 0.048, scale: 0.85 }, // Vaso interno
-                { r: 25, dr: 7, c: 0xf43f5e, count: 38000, op: 0.5, s: 0.04, scale: 1.05 },  // Capa media rubí
-                { r: 45, dr: 12, c: 0xff1493, count: 55000, op: 0.35, s: 0.035, scale: 1.25 }, // Manto externo rosa
-                { r: 75, dr: 25, c: 0xfbbf24, count: 75000, op: 0.18, s: 0.028, scale: 1.4 }   // Polvo áureo circundante
+                { r: 12, dr: 4, count: 6000, op: 0.95, s: 2.6, scale: 0.85, emojiIdx: 1 }, // 💖
+                { r: 25, dr: 7, count: 9000, op: 0.92, s: 2.8, scale: 1.05, emojiIdx: 0 },  // 🩷
+                { r: 45, dr: 12, count: 12000, op: 0.88, s: 2.5, scale: 1.25, emojiIdx: 3 }, // 💗
+                { r: 75, dr: 25, count: 7000, op: 0.80, s: 2.2, scale: 1.45, emojiIdx: 2 }   // 💕
             ];
 
             ringParams.forEach(p => {
@@ -843,9 +876,18 @@
                 geo.setAttribute('heartPos', new THREE.BufferAttribute(hPos, 3));
                 geo.setAttribute('explosionDir', new THREE.BufferAttribute(eDir, 3));
 
-                const pts = new THREE.Points(geo, new THREE.PointsMaterial({
-                    color: p.c, size: p.s, transparent: true, opacity: p.op, blending: THREE.AdditiveBlending, depthWrite: false
-                }));
+                const ptsMat = new THREE.PointsMaterial({
+                    map: getHeartEmojiTexture(p.emojiIdx),
+                    size: p.s,
+                    transparent: true,
+                    opacity: p.op,
+                    alphaTest: 0.01,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                });
+                ptsMat.baseSize = p.s;
+
+                const pts = new THREE.Points(geo, ptsMat);
                 galaxyGroup.add(pts);
                 allParticles.push(pts);
             });
@@ -933,7 +975,12 @@
                     const hp = sys.geometry.attributes.heartPos;
                     const ed = sys.geometry.attributes.explosionDir;
 
-                    sys.material.opacity = (isTransitioning ? 0.78 : 0.45) + Math.sin(time * 3 + idx) * 0.2;
+                    if (sys.material.baseSize) {
+                        const beatSize = transitionFactor > 0.85 ? heartbeat : 1.0;
+                        sys.material.size = THREE.MathUtils.lerp(sys.material.baseSize * 0.6, sys.material.baseSize * beatSize, transitionFactor);
+                    }
+
+                    sys.material.opacity = (isTransitioning ? 0.88 : 0.5) + Math.sin(time * 3 + idx) * 0.12;
 
                     for (let i = 0; i < pos.count; i++) {
                         const i3 = i * 3;
