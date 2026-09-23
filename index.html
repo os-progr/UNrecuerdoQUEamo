@@ -596,8 +596,8 @@
     <div id="universe-view" class="content-overlay">
         <!-- Indicador guía superior -->
         <div id="heart-guide" class="heart-guide-badge visible">
-            <i class="fa-solid fa-hand-pointer text-rose-400 animate-pulse"></i>
-            <span>Toca el corazón para descubrir cada recuerdo</span>
+            <i class="fa-solid fa-arrows-rotate text-rose-400 animate-spin" style="animation-duration: 4s;"></i>
+            <span>Gira el corazón en 3D o tócalo para ver cada recuerdo</span>
         </div>
 
         <!-- Tarjeta Flotante Interactiva de Recuerdos y Aliento -->
@@ -608,7 +608,7 @@
                         <i id="hm-icon" class="fa-solid fa-star text-xs text-amber-300"></i>
                         <span id="hm-category">Aliento y Fuerza</span>
                     </span>
-                    <span id="hm-counter" class="text-xs text-rose-300/80 font-mono font-bold">1 / 12</span>
+                    <span id="hm-counter" class="text-xs text-rose-300/80 font-mono font-bold">1 / 8</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="minimizeHeartCard(event)" class="w-7 h-7 rounded-full bg-white/10 hover:bg-rose-600/70 text-slate-300 hover:text-white flex items-center justify-center text-xs transition" title="Minimizar">
@@ -617,13 +617,23 @@
                 </div>
             </div>
 
-            <h3 id="hm-title" class="font-['Cinzel'] text-lg md:text-xl font-bold text-white mb-2 leading-snug tracking-wide">
-                Tu Fuerza Es Infinita
-            </h3>
-
-            <p id="hm-text" class="text-slate-200 text-sm md:text-[15px] leading-relaxed font-light mb-4 whitespace-pre-line">
-                Sé lo capaz, valiente y resiliente que eres. Nunca dudes de tu luz propia; la vida te tiene preparadas cosas extraordinarias y sé que vas a lograr cada meta que te propongas.
-            </p>
+            <!-- Foto y Texto del Recuerdo Integrados -->
+            <div class="flex items-start gap-4 mb-4">
+                <div class="relative group shrink-0">
+                    <img id="hm-img" src="img/recuerdo_juntos.jpg" alt="Foto Recuerdo" class="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover shadow-xl border border-rose-500/40 cursor-pointer transition-transform duration-300 group-hover:scale-105" onclick="openPhotoFromCard()">
+                    <div class="absolute inset-0 bg-black/35 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <i class="fa-solid fa-expand text-white text-xs"></i>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 id="hm-title" class="font-['Cinzel'] text-base md:text-lg font-bold text-white mb-1.5 leading-snug tracking-wide">
+                        Bajo la Luz de la Ciudad
+                    </h3>
+                    <p id="hm-text" class="text-slate-200 text-xs md:text-sm leading-relaxed font-light line-clamp-3">
+                        Recuerdo el frío de aquella noche y cómo caminar a tu lado hacía que el mundo entero se sintiera en calma. A pesar de que los caminos tomaron rumbos distintos, ese instante y tu sonrisa quedaron grabados como una de las memorias más limpias y especiales de mi vida.
+                    </p>
+                </div>
+            </div>
 
             <div class="flex items-center justify-between pt-3 border-t border-white/10 flex-wrap gap-2">
                 <div class="flex items-center gap-2">
@@ -636,7 +646,7 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="switchView('gallery')" class="text-xs text-sky-400 hover:text-sky-300 font-semibold transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-camera-retro"></i> Ver Fotos
+                        <i class="fa-solid fa-camera-retro"></i> Ver Galería Completa
                     </button>
                 </div>
             </div>
@@ -646,7 +656,7 @@
         <button id="heart-mini-pill" class="heart-mini-pill" onclick="restoreHeartCard(event)">
             <i class="fa-solid fa-heart text-rose-500 animate-pulse"></i>
             <span>Ver Recuerdos y Mensajes de Aliento</span>
-            <span id="mini-counter" class="text-xs text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 font-bold">1 / 12</span>
+            <span id="mini-counter" class="text-xs text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 font-bold">1 / 8</span>
         </button>
     </div>
 
@@ -702,89 +712,90 @@
            1. SIMULACIÓN CÓSMICA Y CORAZÓN 3D VOLUMÉTRICO HIPERREALISTA (THREE.JS)
            ------------------------------------------------------------------ */
         let scene, camera, renderer, clock;
-        let galaxyGroup, nebulaGroup, heartSystem, coreSystem, aortaSystem;
+        let galaxyGroup, nebulaGroup;
         let allParticles = [];
-        let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
         let isTransitioning = false, phase = 'exploration';
         let transitionFactor = 0, explosionFactor = 0, isExploding = false;
         let cameraLookY = 0, extraHeartGlow = 0;
 
+        // Variables de interacción 3D (Rotación orbital 360° y arrastre)
+        let isPointerDown = false;
+        let isDragging = false;
+        let pointerStartX = 0, pointerStartY = 0;
+        let lastPointerX = 0, lastPointerY = 0;
+        let targetOrbitRotation = { x: 0.12, y: 0 };
+        let currentOrbitRotation = { x: 0.12, y: 0 };
+        let autoRotate = true;
+        let autoRotateTimer = null;
+
         /*
-           COLECCIÓN DE RECUERDOS Y MENSAJES DE ALIENTO EN EL CORAZÓN
-           (Recuerdos, cómo la extraño, mensajes de aliento y paz a pesar de todo)
+           COLECCIÓN DE RECUERDOS Y MENSAJES DE ALIENTO EN EL CORAZÓN 3D
+           (100% fotos reales integradas, aliento, recuerdos y gratitud)
         */
         const heartMemories = [
             {
-                tag: "Aliento y Fuerza",
-                icon: "fa-star",
-                title: "Tu Fuerza Es Infinita",
-                text: "Sé lo capaz, valiente y resiliente que eres. Nunca dudes de tu luz propia; la vida te tiene preparadas cosas extraordinarias y sé que vas a lograr cada meta que te propongas."
-            },
-            {
-                tag: "De Cómo Te Extraño",
-                icon: "fa-heart",
-                title: "Un Pensamiento en Silencio",
-                text: "Hay días en los que inevitablemente te extraño; extraño tu risa espontánea, tus ocurrencias y esa manera tan única que tenías de iluminar cualquier tarde gris. Te recuerdo con ternura y cariño."
-            },
-            {
-                tag: "A Pesar de Todo",
-                icon: "fa-dove",
-                title: "Paz y Gratitud en el Alma",
-                text: "A pesar de todo lo que pasó y de que hoy caminemos por sendas distintas, en mí solo queda agradecimiento. Me quedo con lo noble que vivimos y con el respeto mutuo que siempre fue real."
-            },
-            {
+                id: 'm_juntos',
                 tag: "Bonito Recuerdo",
                 icon: "fa-sparkles",
-                title: "Aquella Noche Fría",
-                text: "Recuerdo esa noche caminando juntos bajo las luces de la ciudad. El viento estaba helado, pero estar a tu lado hacía que el mundo entero se sintiera en calma. Ese instante vive intacto en mí."
+                title: "Bajo la Luz de la Ciudad",
+                image: "img/recuerdo_juntos.jpg",
+                text: "Recuerdo el frío de aquella noche y cómo caminar a tu lado hacía que el mundo entero se sintiera en calma. A pesar de que los caminos tomaron rumbos distintos, ese instante y tu sonrisa quedaron grabados como una de las memorias más limpias y especiales de mi vida."
             },
             {
-                tag: "Mensaje de Aliento",
-                icon: "fa-sun",
-                title: "Que la Vida Te Sonría",
-                text: "Deseo con toda mi alma que encuentres paz en cada paso que des, que la vida te rodee de personas que cuiden tu corazón y que nunca, jamás, dejes de sonreír como tú sabes hacerlo."
+                id: 'm_juntos_sonrisa',
+                tag: "De Cómo Te Extraño",
+                icon: "fa-heart",
+                title: "La Sinceridad de Tu Sonrisa",
+                image: "img/recuerdo_juntos_sonrisa.jpg",
+                text: "Hay días en los que extraño tu risa espontánea y esa complicidad que teníamos. No te extraño desde el apego o el dolor, sino desde la ternura de recordar lo felices y genuinos que fuimos cuando compartíamos el camino."
             },
             {
+                id: 'm_anillos',
                 tag: "Nuestro Símbolo",
                 icon: "fa-gem",
-                title: "La Verdad de una Promesa",
-                text: "Nuestras manos unidas y aquellos anillos representaron algo puro y noble. Aunque los destinos tomen direcciones distintas, el aprendizaje de amarte y cuidarte me convirtió en una mejor persona."
+                title: "El Valor de una Promesa",
+                image: "img/recuerdo_anillos.jpg",
+                text: "Nuestras manos unidas llevando aquel símbolo representaron algo puro y noble. Aunque hoy sigamos caminos diferentes, lo que aprendí a tu lado sobre el respeto, la lealtad y el cuidado mutuo siempre vivirá en mí."
             },
             {
-                tag: "De Cómo Te Extraño",
-                icon: "fa-cloud-moon",
-                title: "En la Quietud del Tiempo",
-                text: "A veces escucho una canción o paso por un rincón conocido, y por un segundo te busco en el pensamiento. No desde el dolor, sino desde la nostalgia bonita de haber compartido la vida contigo."
+                id: 'm_ella_bote',
+                tag: "Aliento y Fuerza",
+                icon: "fa-sun",
+                title: "Tu Mirada al Horizonte",
+                image: "img/recuerdo_ella_bote.jpg",
+                text: "Te recuerdo así: contemplando el porvenir con serenidad. Tienes una luz y una fortaleza interior admirables. Nunca dudes de lo lejos que puedes llegar; sé que vas a conquistar cada sueño que te propongas en la vida."
             },
             {
-                tag: "A Pesar de Todo",
-                icon: "fa-seedling",
-                title: "Crecer y Perdonar",
-                text: "Las despedidas no son fáciles, pero el tiempo enseña a valorar lo vivido. Hoy miro hacia atrás y agradezco cada conversación y cada risa. Lo que fuimos fue hermoso y valió toda la pena."
-            },
-            {
-                tag: "Mensaje de Aliento",
-                icon: "fa-fire",
-                title: "No Te Rindas Jamás",
-                text: "Cuando sientas que el camino se pone difícil, recuerda de qué estás hecha. Tienes una mente brillante, un corazón generoso y la fuerza para superar cualquier obstáculo que se te presente."
-            },
-            {
-                tag: "Bonito Recuerdo",
-                icon: "fa-camera",
-                title: "La Dulzura de Tu Esencia",
-                text: "Siempre admiré tu bondad y esa manera tan pura de preocuparte por los que amas. Esos detalles no se olvidan; dejaste una huella dulce y sincera que guardo con enorme aprecio."
-            },
-            {
+                id: 'm_ella',
                 tag: "Deseo del Corazón",
-                icon: "fa-envelope-open-text",
-                title: "Dondequiera Que Estés",
-                text: "Que cada amanecer te traiga nuevos motivos para ser feliz, que no te falte salud ni tranquilidad, y que alcances todos esos sueños de los que alguna vez me hablaste con tanta ilusión."
+                icon: "fa-seedling",
+                title: "Tu Dulzura y Tu Esencia",
+                image: "img/recuerdo_ella.jpg",
+                text: "Siempre admiré tu bondad y la manera tan sincera que tenías de cuidar de los demás. Deseo que la vida te trate con gentileza, que nunca te falte salud ni alegría, y que conserves siempre ese corazón noble."
             },
             {
+                id: 'm_paisaje_lago',
+                tag: "Lugares Especiales",
+                icon: "fa-water",
+                title: "Caminos Sobre el Agua",
+                image: "img/recuerdo_paisaje_lago.jpg",
+                text: "El cielo azul reflejado en el lago y la tranquilidad de aquel viaje. Compartir esos paisajes contigo fue un regalo hermoso. Los lugares guardan la huella de lo que fuimos, y ese viaje siempre tendrá un rincón privilegiado en mis recuerdos."
+            },
+            {
+                id: 'm_viaje',
+                tag: "A Pesar de Todo",
+                icon: "fa-dove",
+                title: "Aprender, Crecer y Agradecer",
+                image: "img/recuerdo_viaje.jpg",
+                text: "A pesar de todo lo que pasó y de que ya hayan pasado meses desde nuestra despedida, en mí solo hay paz y gratitud. Las personas que de verdad marcaron nuestra vida se recuerdan con respeto, y yo a ti te deseo lo más bonito del mundo."
+            },
+            {
+                id: 'm_pensamiento',
                 tag: "Gratitud Eterna",
                 icon: "fa-infinity",
-                title: "Lo Que Queda en el Corazón",
-                text: "Las historias no se miden por el tiempo que duran, sino por la verdad que dejaron dentro. Gracias por lo que fuiste en mi vida. Te guardo en mi memoria con el más respetuoso y sincero cariño."
+                title: "Paz en el Alma y Buenos Deseos",
+                image: "img/recuerdo_pensamiento.jpg",
+                text: "En el silencio de la noche, miro hacia atrás con serenidad. Gracias por todo lo bueno que compartimos. Te guardo en mi memoria con aprecio genuino, deseándote siempre éxito, protección y la mayor felicidad en tu vida."
             }
         ];
 
@@ -799,6 +810,12 @@
             if (card) {
                 card.classList.add('message-switch');
                 setTimeout(() => card.classList.remove('message-switch'), 380);
+            }
+
+            const imgEl = document.getElementById('hm-img');
+            if (imgEl) {
+                imgEl.src = mem.image;
+                imgEl.alt = mem.title;
             }
 
             const catEl = document.getElementById('hm-category');
@@ -818,6 +835,19 @@
 
             const miniCounter = document.getElementById('mini-counter');
             if (miniCounter) miniCounter.innerText = `${idx + 1} / ${heartMemories.length}`;
+        }
+
+        function openPhotoFromCard() {
+            const mem = heartMemories[currentHeartIdx];
+            if (!mem) return;
+
+            document.getElementById('modal-img').src = mem.image;
+            document.getElementById('modal-category').innerText = mem.tag;
+            document.getElementById('modal-date').querySelector('span').innerText = mem.tag;
+            document.getElementById('modal-title').innerText = mem.title;
+            document.getElementById('modal-desc').innerText = mem.text;
+
+            document.getElementById('detail-modal').classList.add('active');
         }
 
         function nextHeartMemory(e) {
@@ -884,22 +914,66 @@
             extraHeartGlow = 1.0;
         }
 
-        function handleScreenInteraction(e) {
+        /* ----------------------------------------------------
+           MANEJO DE EVENTOS DE RATÓN Y TÁCTIL (ÓRBITA 3D 360°)
+           ---------------------------------------------------- */
+        function onPointerDown(e) {
             const target = e.target;
-            if (!target) return;
-            if (target.closest('button') || target.closest('.modal-card') || target.closest('#add-modal') || target.closest('#detail-modal') || target.closest('.interactive-layer') || target.closest('.glass-nav') || target.closest('#heart-message-card') || target.closest('#heart-mini-pill')) {
+            if (target && (target.closest('button') || target.closest('.modal-card') || target.closest('#detail-modal') || target.closest('.glass-nav') || target.closest('#heart-message-card') || target.closest('#heart-mini-pill'))) {
                 return;
             }
 
-            const x = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : window.innerWidth / 2);
-            const y = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : window.innerHeight / 2);
+            isPointerDown = true;
+            isDragging = false;
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            pointerStartX = clientX;
+            pointerStartY = clientY;
+            lastPointerX = clientX;
+            lastPointerY = clientY;
+            autoRotate = false;
+            if (autoRotateTimer) clearTimeout(autoRotateTimer);
+        }
 
-            spawnHeartBurst(x, y);
+        function onPointerMove(e) {
+            if (!isPointerDown) return;
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            const deltaX = clientX - lastPointerX;
+            const deltaY = clientY - lastPointerY;
 
-            if (isTransitioning) {
+            if (Math.abs(clientX - pointerStartX) > 6 || Math.abs(clientY - pointerStartY) > 6) {
+                isDragging = true;
+            }
+
+            if (isDragging) {
+                targetOrbitRotation.y += deltaX * 0.008;
+                targetOrbitRotation.x += deltaY * 0.008;
+                // Limitar ángulo de inclinación vertical
+                targetOrbitRotation.x = Math.max(-Math.PI * 0.42, Math.min(Math.PI * 0.42, targetOrbitRotation.x));
+            }
+
+            lastPointerX = clientX;
+            lastPointerY = clientY;
+        }
+
+        function onPointerUp(e) {
+            if (!isPointerDown) return;
+            isPointerDown = false;
+
+            // Si fue un toque o clic sin arrastre:
+            if (!isDragging) {
+                const clientX = e.clientX || (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : pointerStartX);
+                const clientY = e.clientY || (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : pointerStartY);
+                spawnHeartBurst(clientX, clientY);
                 pulseHeartLight();
                 nextHeartMemory();
             }
+
+            // Reanudar suave auto-rotación tras 2.2 segundos de inactividad
+            autoRotateTimer = setTimeout(() => {
+                autoRotate = true;
+            }, 2200);
         }
 
         function initCosmos() {
@@ -919,13 +993,23 @@
             createCosmicSimulation();
 
             window.addEventListener('resize', onWindowResize);
-            window.addEventListener('mousemove', (e) => {
-                targetX = (e.clientX - window.innerWidth / 2) * 0.0006;
-                targetY = (e.clientY - window.innerHeight / 2) * 0.0006;
-            });
 
-            window.addEventListener('mousedown', (e) => handleScreenInteraction(e));
-            window.addEventListener('touchstart', (e) => handleScreenInteraction(e), { passive: true });
+            // Controles de puntero para Órbita 3D 360° y toques interactivos
+            window.addEventListener('mousedown', onPointerDown);
+            window.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('mouseup', onPointerUp);
+
+            window.addEventListener('touchstart', onPointerDown, { passive: true });
+            window.addEventListener('touchmove', onPointerMove, { passive: true });
+            window.addEventListener('touchend', onPointerUp, { passive: true });
+
+            // Zoom suave con rueda de ratón en el corazón 3D
+            window.addEventListener('wheel', (e) => {
+                const univ = document.getElementById('universe-view');
+                if (univ && univ.style.display !== 'none') {
+                    camera.position.z = Math.max(38, Math.min(130, camera.position.z + e.deltaY * 0.05));
+                }
+            }, { passive: true });
 
             // Formar el corazón 3D directamente al entrar
             isTransitioning = true;
@@ -956,20 +1040,21 @@
                 z = (Math.random() - 0.5) * 2.8;
 
                 if (evaluateHeartImplicit(x, y, z) <= 0.02) {
-                    // Mapeo anatómico: orientar hacia arriba
-                    // El eje Y es vertical, el eje X es ancho, el eje Z es profundidad
+                    // Mapeo anatómico 3D con espesor volumétrico reforzado
+                    // X: ancho lateral, Y: vertical, Z: espesor sagital
                     const tx = x * 15 * scale;
                     const ty = (z * 15 + 2.5) * scale;
-                    const tz = y * 13 * scale;
+                    const tz = y * 18 * scale;
                     return { x: tx, y: ty, z: tz };
                 }
             }
-            // Fallback paramétrico suave
+            // Fallback paramétrico suave con profundidad redondeada
             const t = Math.random() * Math.PI * 2;
             const u = (Math.random() - 0.5) * Math.PI;
             const hx = 16 * Math.pow(Math.sin(t), 3);
             const hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-            const hz = Math.sin(u) * 12;
+            const depthFactor = Math.max(0.25, 1 - Math.abs(hy) / 22);
+            const hz = Math.sin(u) * 15 * depthFactor;
             return { x: hx * scale, y: (hy + 3) * scale, z: hz * scale };
         }
 
@@ -1038,7 +1123,7 @@
                 nebulaGroup.add(nebula);
             }
 
-            // 2. Campo Estelar Cósmico con Emojis de Corazones Rosas
+            // 2. Campo Estelar Cósmico con Emojis de Corazones Rosas (Integrado al grupo 3D)
             const starCount = 35000;
             const starGeo = new THREE.BufferGeometry();
             const starPos = new Float32Array(starCount * 3);
@@ -1081,7 +1166,8 @@
             });
             starsMat.baseSize = 2.2;
             const stars = new THREE.Points(starGeo, starsMat);
-            scene.add(stars);
+            // Se añade a galaxyGroup para que rote al unísono en 3D
+            galaxyGroup.add(stars);
             allParticles.push(stars);
 
             // 3. Capas del Corazón formadas por Emojis de Corazones Rosas
@@ -1190,15 +1276,26 @@
             requestAnimationFrame(animateCosmos);
             const time = clock.getElapsedTime();
 
-            mouseX += (targetX - mouseX) * 0.035;
-            mouseY += (targetY - mouseY) * 0.035;
-            camera.position.x = mouseX * 75;
-            camera.position.y = -mouseY * 75;
+            // Rotación 3D Continua y Órbita Libre Interactiva
+            if (autoRotate) {
+                targetOrbitRotation.y += 0.0055;
+                targetOrbitRotation.x = Math.sin(time * 0.5) * 0.12;
+            }
+
+            currentOrbitRotation.x += (targetOrbitRotation.x - currentOrbitRotation.x) * 0.08;
+            currentOrbitRotation.y += (targetOrbitRotation.y - currentOrbitRotation.y) * 0.08;
+
+            if (galaxyGroup) {
+                galaxyGroup.rotation.x = currentOrbitRotation.x;
+                galaxyGroup.rotation.y = currentOrbitRotation.y;
+            }
 
             const targetZ = isTransitioning ? 62 : 100;
-            camera.position.z += (targetZ - camera.position.z) * 0.0055;
+            if (!isPointerDown) {
+                camera.position.z += (targetZ - camera.position.z) * 0.0055;
+            }
 
-            const targetLookY = isTransitioning ? -2.2 : 0;
+            const targetLookY = isTransitioning ? -1.8 : 0;
             cameraLookY += (targetLookY - cameraLookY) * 0.015;
             camera.lookAt(0, cameraLookY, 0);
 
@@ -1209,11 +1306,6 @@
             if (nebulaGroup) {
                 nebulaGroup.rotation.y += 0.00012;
                 nebulaGroup.rotation.z += 0.00006;
-            }
-
-            if (galaxyGroup && phase === 'exploration') {
-                galaxyGroup.rotation.y += 0.00085;
-                galaxyGroup.children.forEach((c, i) => c.rotation.z += 0.00032 * (i + 1));
             }
 
             if (isTransitioning) {
@@ -1265,7 +1357,6 @@
                     pos.needsUpdate = true;
 
                     if (transitionFactor > 0.85) {
-                        if (phase !== 'heart') sys.rotation.y += 0.002;
                         // Aplicar latido biológico realista dual
                         sys.scale.setScalar(heartbeat);
                     }
@@ -1285,10 +1376,7 @@
         /* ----------------------------------------------------
            2. GESTOR DE RECUERDOS Y GALERÍA 4K ULTRA HD
            ---------------------------------------------------- */
-        /* ----------------------------------------------------
-           2. GESTOR DE RECUERDOS Y GALERÍA 4K ULTRA HD
-           ---------------------------------------------------- */
-        const STORAGE_KEY = 'unrecuerdoqueamo_memories_v8';
+        const STORAGE_KEY = 'unrecuerdoqueamo_memories_v9';
 
         // 8 Recuerdos Reales (100% fotos auténticas)
         const defaultMemories = [
