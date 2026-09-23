@@ -506,11 +506,11 @@
     <!-- PANTALLA INICIAL DEL UNIVERSO -->
     <div id="universe-view" class="content-overlay">
         <div id="start-screen" class="interactive-layer text-center px-4">
-            <h1 class="stellar-title">Mi universo gravita en torno a ti</h1>
-            <p class="stellar-subtitle">Cada estrella guarda un recuerdo infinito de lo que fuiste, eres y serás</p>
+            <h1 class="stellar-title">Un Rincón en el Tiempo</h1>
+            <p class="stellar-subtitle">Hay historias que, aunque tomen caminos distintos, siempre guardarán momentos hermosos y sinceros.</p>
             <div class="flex justify-center gap-6 mt-14 flex-wrap">
                 <button id="love-button" class="btn-cosmic" onclick="activateCosmicHeart()">
-                    <i class="fa-solid fa-heart mr-2 text-rose-500"></i> Formar Corazón Cósmico
+                    <i class="fa-solid fa-heart mr-2 text-rose-500"></i> Ver Nuestro Símbolo
                 </button>
                 <button class="btn-cosmic" style="border-color: var(--secondary);" onclick="switchView('gallery')">
                     <i class="fa-solid fa-photo-film mr-2 text-sky-400"></i> Galería de Recuerdos
@@ -520,8 +520,8 @@
 
         <!-- Mensaje final al formarse el corazón 3D -->
         <div id="final-screen" class="final-message">
-            <h2 class="main-text">TE AMO</h2>
-            <p class="sub-text">Infinitamente tuyo a través del espacio y el tiempo</p>
+            <h2 class="main-text">GRACIAS</h2>
+            <p class="sub-text">Por las risas, por lo que fuimos y por todo lo bueno que aprendimos juntos</p>
             <div class="mt-10 flex justify-center gap-5 flex-wrap">
                 <button class="btn-cosmic" onclick="switchView('gallery')">
                     <i class="fa-solid fa-camera-retro mr-2"></i> Ver Álbum de Recuerdos
@@ -541,10 +541,10 @@
     <section id="gallery-section">
         <div class="text-center mb-16">
             <span class="text-xs uppercase tracking-widest text-rose-400 font-bold px-4 py-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 inline-block mb-3">
-                Álbum Inmortal
+                Momentos Compartidos
             </span>
-            <h2 class="stellar-title" style="font-size: clamp(2.2rem, 4.5vw, 3.6rem);">Nuestra Constelación de Recuerdos</h2>
-            <p class="stellar-subtitle">Fotografías, cartas y momentos grabados en el alma en ultra alta definición</p>
+            <h2 class="stellar-title" style="font-size: clamp(2.2rem, 4.5vw, 3.6rem);">Memorias de un Tiempo Bonito</h2>
+            <p class="stellar-subtitle">Una mirada con respeto, madurez y gratitud hacia los instantes que marcaron una etapa especial de nuestras vidas.</p>
         </div>
 
         <!-- Filtros Rápidos -->
@@ -1025,7 +1025,7 @@
         /* ----------------------------------------------------
            2. GESTOR DE RECUERDOS Y GALERÍA 4K ULTRA HD
            ---------------------------------------------------- */
-        const STORAGE_KEY = 'unrecuerdoqueamo_memories_v5';
+        const STORAGE_KEY = 'unrecuerdoqueamo_memories_v6';
 
         // Recuerdos iniciales personalizados con las fotos reales
         const defaultMemories = [
