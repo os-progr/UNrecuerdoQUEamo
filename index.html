@@ -585,33 +585,17 @@
     <!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
     <nav class="glass-nav">
         <button class="nav-btn active" id="btn-nav-universe" onclick="switchView('universe')">
-            <i class="fa-solid fa-atom text-rose-400"></i> Universo
+            <i class="fa-solid fa-heart text-rose-400"></i> Corazón Cósmico
         </button>
         <button class="nav-btn" id="btn-nav-gallery" onclick="switchView('gallery')">
-            <i class="fa-solid fa-images text-sky-400"></i> Recuerdos 4K
-        </button>
-        <button class="nav-btn" onclick="openAddModal()">
-            <i class="fa-solid fa-plus-circle text-amber-300"></i> Añadir Foto
+            <i class="fa-solid fa-images text-sky-400"></i> Galería de Recuerdos
         </button>
     </nav>
 
-    <!-- PANTALLA INICIAL DEL UNIVERSO -->
+    <!-- VISTA PRINCIPAL DEL UNIVERSO Y CORAZÓN 3D -->
     <div id="universe-view" class="content-overlay">
-        <div id="start-screen" class="interactive-layer text-center px-4">
-            <h1 class="stellar-title">Un Rincón en el Tiempo</h1>
-            <p class="stellar-subtitle">Hay historias que, aunque tomen caminos distintos, siempre guardarán momentos hermosos y sinceros.</p>
-            <div class="flex justify-center gap-6 mt-14 flex-wrap">
-                <button id="love-button" class="btn-cosmic" onclick="activateCosmicHeart()">
-                    <i class="fa-solid fa-heart mr-2 text-rose-500"></i> Ver Nuestro Símbolo
-                </button>
-                <button class="btn-cosmic" style="border-color: var(--secondary);" onclick="switchView('gallery')">
-                    <i class="fa-solid fa-photo-film mr-2 text-sky-400"></i> Galería de Recuerdos
-                </button>
-            </div>
-        </div>
-
         <!-- Indicador guía superior -->
-        <div id="heart-guide" class="heart-guide-badge">
+        <div id="heart-guide" class="heart-guide-badge visible">
             <i class="fa-solid fa-hand-pointer text-rose-400 animate-pulse"></i>
             <span>Toca el corazón para descubrir cada recuerdo</span>
         </div>
@@ -676,14 +660,6 @@
             <p class="stellar-subtitle">Una mirada con respeto, madurez y gratitud hacia los instantes que marcaron una etapa especial de nuestras vidas.</p>
         </div>
 
-        <!-- Filtros Rápidos -->
-        <div class="flex justify-center gap-3 mb-12 flex-wrap">
-            <button class="filter-btn active px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600/30 border border-rose-500 text-white transition-all hover:bg-rose-600/50" onclick="filterMemories('all')">Todos</button>
-            <button class="filter-btn px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-900/70 border border-slate-700 text-slate-300 transition-all hover:border-rose-500 hover:text-white" onclick="filterMemories('especial')">Especiales</button>
-            <button class="filter-btn px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-900/70 border border-slate-700 text-slate-300 transition-all hover:border-rose-500 hover:text-white" onclick="filterMemories('viaje')">Viajes</button>
-            <button class="filter-btn px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-900/70 border border-slate-700 text-slate-300 transition-all hover:border-rose-500 hover:text-white" onclick="filterMemories('carta')">Cartas</button>
-        </div>
-
         <!-- Cuadrícula de Recuerdos (Render dinámico) -->
         <div id="memories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Las tarjetas se generan por JS -->
@@ -714,72 +690,9 @@
                     </div>
                     <div class="pt-6 border-t border-white/10 flex items-center justify-between mt-8">
                         <span class="text-xs text-slate-400 italic">"Los recuerdos son la forma en que el corazón detiene el tiempo"</span>
-                        <button id="modal-like-btn" class="like-btn text-base font-semibold" onclick="toggleModalLike()">
-                            <i class="fa-solid fa-heart text-rose-500"></i> <span id="modal-likes-count">0</span>
-                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL PARA AGREGAR NUEVO RECUERDO -->
-    <div id="add-modal" onclick="closeAddModal(event)">
-        <div class="modal-card max-w-xl p-8" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-['Cinzel'] text-2xl font-bold text-white flex items-center gap-3">
-                    <i class="fa-solid fa-sparkles text-rose-500"></i> Agregar Nuevo Recuerdo
-                </h3>
-                <button class="w-8 h-8 rounded-full bg-white/10 hover:bg-rose-600 text-white flex items-center justify-center transition" onclick="closeAddModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="add-memory-form" onsubmit="saveNewMemory(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">Título del Recuerdo</label>
-                    <input type="text" id="new-title" required class="glass-input" placeholder="Ej: Aquella noche bajo las luces de la ciudad">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">Fecha o Momento</label>
-                        <input type="text" id="new-date" required class="glass-input" placeholder="Ej: Instantes Inolvidables">
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">Categoría</label>
-                        <select id="new-category" class="glass-input">
-                            <option value="especial" class="bg-slate-900 text-white">Especial</option>
-                            <option value="viaje" class="bg-slate-900 text-white">Viaje</option>
-                            <option value="carta" class="bg-slate-900 text-white">Carta</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">Foto (URL o Subir archivo)</label>
-                    <input type="url" id="new-img-url" class="glass-input mb-2" placeholder="Pega una URL de foto 4K (o sube abajo)">
-                    <div class="flex items-center gap-3">
-                        <label class="btn-cosmic cursor-pointer py-2.5 px-5 text-xs font-medium m-0 flex items-center gap-2">
-                            <i class="fa-solid fa-upload"></i> Subir desde tu equipo
-                            <input type="file" id="new-file-input" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
-                        </label>
-                        <span id="file-name-preview" class="text-xs text-slate-400 truncate max-w-xs">Sin archivo seleccionado</span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-300 font-semibold mb-1">Mensaje / Dedicatoria / Historia</label>
-                    <textarea id="new-desc" rows="4" required class="glass-input" placeholder="Escribe lo que sentiste en ese instante irrepetible..."></textarea>
-                </div>
-
-                <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider text-slate-400 hover:text-white" onclick="closeAddModal()">Cancelar</button>
-                    <button type="submit" class="btn-cosmic py-2.5 px-7 text-xs font-bold">
-                        <i class="fa-solid fa-save mr-1"></i> Guardar en la Galería
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -1013,6 +926,14 @@
 
             window.addEventListener('mousedown', (e) => handleScreenInteraction(e));
             window.addEventListener('touchstart', (e) => handleScreenInteraction(e), { passive: true });
+
+            // Formar el corazón 3D directamente al entrar
+            isTransitioning = true;
+            setTimeout(() => {
+                const guide = document.getElementById('heart-guide');
+                if (guide) guide.classList.add('visible');
+                showHeartCard();
+            }, 600);
 
             animateCosmos();
         }
@@ -1364,77 +1285,80 @@
         /* ----------------------------------------------------
            2. GESTOR DE RECUERDOS Y GALERÍA 4K ULTRA HD
            ---------------------------------------------------- */
-        const STORAGE_KEY = 'unrecuerdoqueamo_memories_v7';
+        /* ----------------------------------------------------
+           2. GESTOR DE RECUERDOS Y GALERÍA 4K ULTRA HD
+           ---------------------------------------------------- */
+        const STORAGE_KEY = 'unrecuerdoqueamo_memories_v8';
 
-        // Recuerdos iniciales personalizados con las fotos reales
+        // 8 Recuerdos Reales (100% fotos auténticas)
         const defaultMemories = [
             {
                 id: 'm_juntos',
-                title: 'Aquella Noche Bajo las Luces',
-                date: 'Instantes Inolvidables',
-                category: 'especial',
+                title: 'Bajo la Luz de la Ciudad',
+                date: 'Nuestras Risas Juntos',
+                category: 'Especial',
                 image: 'img/recuerdo_juntos.jpg',
-                desc: 'A pesar del tiempo y los caminos que toma la vida, hay momentos que quedan suspendidos como estrellas eternas. Recuerdo el frío de esa noche y cómo tu cercanía hacía que el mundo entero se sintiera en calma. Gracias por haberme regalado instantes tan puros y verdaderos.',
-                likes: 198
+                desc: 'A pesar del tiempo y los caminos que tomó la vida, hay momentos que quedan suspendidos como estrellas eternas. Recuerdo el frío de esa noche y cómo tu cercanía hacía que el mundo entero se sintiera en calma. Gracias por haberme regalado instantes tan puros y verdaderos.'
+            },
+            {
+                id: 'm_juntos_sonrisa',
+                title: 'La Complicidad de Dos Miradas',
+                date: 'Instantes Inolvidables',
+                category: 'Especial',
+                image: 'img/recuerdo_juntos_sonrisa.jpg',
+                desc: 'Ver esta foto me recuerda lo natural y genuino que fue lo nuestro. No necesitábamos poses ni apariencias; una sonrisa compartida bastaba para sentirnos en casa. Me alegra el alma saber que vivimos momentos tan sinceros.'
             },
             {
                 id: 'm_anillos',
-                title: 'Nuestra Promesa y el Tiempo',
-                date: 'Un Símbolo Eterno',
-                category: 'especial',
+                title: 'El Valor de una Promesa',
+                date: 'Un Símbolo en el Tiempo',
+                category: 'Especial',
                 image: 'img/recuerdo_anillos.jpg',
-                desc: 'Nuestras manos unidas llevando un mismo símbolo. No hacían falta palabras para saber lo que significaba: un cariño transparente, noble y sincero. Aunque la vida nos lleve por rumbos diferentes, el valor y la verdad de lo que prometimos en ese instante siempre vivirá en mí con profundo respeto y agradecimiento.',
-                likes: 312
+                desc: 'Nuestras manos unidas llevando un mismo símbolo. No hacían falta palabras para saber lo que significaba: un cariño transparente, noble y leal. Aunque hoy sigamos caminos diferentes, lo que aprendí a tu lado sobre el respeto y el cuidado mutuo siempre vivirá en mí.'
+            },
+            {
+                id: 'm_ella_bote',
+                title: 'Tu Mirada al Horizonte',
+                date: 'Aquel Viaje Especial',
+                category: 'Viaje',
+                image: 'img/recuerdo_ella_bote.jpg',
+                desc: 'Te recuerdo así: contemplando el camino con esa serenidad y esa luz que siempre te hicieron única. Deseo con todo mi corazón que allá donde vayas, la vida te regale horizontes amplios, metas cumplidas y una felicidad inmensa.'
             },
             {
                 id: 'm_ella',
-                title: 'Tu Esencia y Tu Mirada',
+                title: 'Tu Dulzura y Tu Esencia',
                 date: 'Siempre en el Recuerdo',
-                category: 'carta',
+                category: 'Recuerdo',
                 image: 'img/recuerdo_ella.jpg',
-                desc: 'Hay personas que dejan una huella imborrable en el alma, y tú siempre serás una de ellas. Siempre admiré la luz de tus ojos, tu nobleza y esa ternura única que tienes. Dondequiera que vayas y todo lo que emprendas, deseo de corazón que la vida te llene de felicidad.',
-                likes: 254
+                desc: 'Hay personas que dejan una huella imborrable en el alma, y tú siempre serás una de ellas. Siempre admiré tu nobleza, tu ternura y esa fuerza que llevas por dentro. Nunca dejes que nada apague ese brillo tan tuyo.'
+            },
+            {
+                id: 'm_paisaje_lago',
+                title: 'Caminos Sobre las Aguas',
+                date: 'Lugares que Marcaron Historia',
+                category: 'Viaje',
+                image: 'img/recuerdo_paisaje_lago.jpg',
+                desc: 'Aquel paisaje flotante y el cielo azul reflejado en el agua. Viajar y compartir esos paisajes contigo fue un regalo de la vida. Los lugares guardan la memoria de lo que fuimos, y este siempre tendrá un significado especial.'
             },
             {
                 id: 'm_viaje',
-                title: 'Horizontes y Crecimiento',
-                date: 'Caminos de Vida',
-                category: 'viaje',
+                title: 'Aprender y Crecer',
+                date: 'Reflexiones de Vida',
+                category: 'Viaje',
                 image: 'img/recuerdo_viaje.jpg',
-                desc: 'Dicen que las personas coinciden en la vida para enseñarse a amar, madurar y valorar lo que de verdad importa. A tu lado aprendí lecciones hermosas que me hicieron mejor persona. Aunque los horizontes cambien, la gratitud por lo vivido permanece intacta.',
-                likes: 142
+                desc: 'Dicen que las personas coinciden para enseñarse a amar, madurar y valorar lo que de verdad importa. A tu lado aprendí lecciones hermosas que me hicieron mejor persona. Aunque los horizontes cambien, la gratitud por lo vivido permanece intacta.'
             },
             {
-                id: 'm1',
-                title: 'El Día que el Universo se Alineó',
-                date: 'Primer Encuentro',
-                category: 'especial',
-                image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
-                desc: 'Aquel primer instante en que nuestras miradas se cruzaron. No hacían falta palabras; el universo entero conspiró para que dos almas se reconocieran en medio de la multitud. Un segundo que se transformó en un recuerdo para siempre.',
-                likes: 124
-            },
-            {
-                id: 'm2',
-                title: 'Bajo el Manto de las Estrellas',
-                date: 'Noche Cósmica',
-                category: 'viaje',
-                image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
-                desc: 'Escapar del ruido para contemplar el firmamento y recordar que, en la inmensidad del espacio, lo más grande que tenemos son las personas que tocaron nuestro corazón.',
-                likes: 89
-            },
-            {
-                id: 'm6',
-                title: 'Gratitud Grabada en el Alma',
-                date: 'Un Deseo Sincero',
-                category: 'carta',
-                image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80',
-                desc: 'No guardo rencor ni reclamos, solo un agradecimiento sincero por cada sonrisa, cada abrazo y cada conversación compartida. Que tu camino esté siempre lleno de paz y que nunca te falten motivos para sonreír.',
-                likes: 342
+                id: 'm_pensamiento',
+                title: 'Paz, Respeto y Buenos Deseos',
+                date: 'En el Silencio de la Noche',
+                category: 'Recuerdo',
+                image: 'img/recuerdo_pensamiento.jpg',
+                desc: 'A veces, en la tranquilidad de la noche, recuerdo nuestra historia con absoluta paz. A pesar de todo lo que pasó, no guardo nada negativo; solo el deseo sincero de que Dios cuide tus pasos y te colme de bendiciones en cada sueño que persigas.'
             }
         ];
 
         let memories = [];
-        let currentFilter = 'all';
         let currentModalMemoryId = null;
 
         function loadMemories() {
@@ -1454,23 +1378,10 @@
 
         function renderMemories() {
             const grid = document.getElementById('memories-grid');
+            if (!grid) return;
             grid.innerHTML = '';
 
-            const filtered = currentFilter === 'all' 
-                ? memories 
-                : memories.filter(m => m.category === currentFilter);
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-20">
-                        <i class="fa-solid fa-moon text-5xl text-rose-500/40 mb-4"></i>
-                        <p class="text-slate-400 font-light">No hay recuerdos en esta categoría aún.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            filtered.forEach(m => {
+            memories.forEach(m => {
                 const card = document.createElement('div');
                 card.className = 'memory-card';
                 card.onclick = () => openDetailModal(m.id);
@@ -1488,42 +1399,13 @@
                         <p class="memory-desc">${m.desc}</p>
                         <div class="memory-footer">
                             <span class="text-xs text-rose-400 font-bold tracking-wider uppercase flex items-center gap-1.5">
-                                <i class="fa-solid fa-expand"></i> Abrir Recuerdo
+                                <i class="fa-solid fa-expand"></i> Ver en Detalle
                             </span>
-                            <button class="like-btn" onclick="toggleLike(event, '${m.id}')">
-                                <i class="fa-solid fa-heart ${m.liked ? 'text-rose-500' : 'text-slate-400'}"></i>
-                                <span>${m.likes || 0}</span>
-                            </button>
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
-        }
-
-        function filterMemories(cat) {
-            currentFilter = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.innerText.toLowerCase().includes(cat === 'all' ? 'todos' : cat)) {
-                    btn.classList.add('bg-rose-600/30', 'border-rose-500', 'text-white');
-                    btn.classList.remove('bg-slate-900/70', 'border-slate-700', 'text-slate-300');
-                } else {
-                    btn.classList.remove('bg-rose-600/30', 'border-rose-500', 'text-white');
-                    btn.classList.add('bg-slate-900/70', 'border-slate-700', 'text-slate-300');
-                }
-            });
-            renderMemories();
-        }
-
-        function toggleLike(e, id) {
-            e.stopPropagation();
-            const mem = memories.find(m => m.id === id);
-            if (mem) {
-                mem.liked = !mem.liked;
-                mem.likes = (mem.likes || 0) + (mem.liked ? 1 : -1);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(memories));
-                renderMemories();
-            }
         }
 
         function openDetailModal(id) {
@@ -1536,16 +1418,6 @@
             document.getElementById('modal-date').querySelector('span').innerText = mem.date;
             document.getElementById('modal-title').innerText = mem.title;
             document.getElementById('modal-desc').innerText = mem.desc;
-            document.getElementById('modal-likes-count').innerText = mem.likes || 0;
-
-            const likeIcon = document.getElementById('modal-like-btn').querySelector('i');
-            if (mem.liked) {
-                likeIcon.classList.add('text-rose-500');
-                likeIcon.classList.remove('text-slate-400');
-            } else {
-                likeIcon.classList.remove('text-rose-500');
-                likeIcon.classList.add('text-slate-400');
-            }
 
             document.getElementById('detail-modal').classList.add('active');
         }
@@ -1554,84 +1426,6 @@
             if (!e || e.target.id === 'detail-modal' || e.target.closest('button')) {
                 document.getElementById('detail-modal').classList.remove('active');
             }
-        }
-
-        function toggleModalLike() {
-            if (!currentModalMemoryId) return;
-            const mem = memories.find(m => m.id === currentModalMemoryId);
-            if (mem) {
-                mem.liked = !mem.liked;
-                mem.likes = (mem.likes || 0) + (mem.liked ? 1 : -1);
-                document.getElementById('modal-likes-count').innerText = mem.likes;
-                const likeIcon = document.getElementById('modal-like-btn').querySelector('i');
-                if (mem.liked) {
-                    likeIcon.classList.add('text-rose-500');
-                    likeIcon.classList.remove('text-slate-400');
-                } else {
-                    likeIcon.classList.remove('text-rose-500');
-                    likeIcon.classList.add('text-slate-400');
-                }
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(memories));
-                renderMemories();
-            }
-        }
-
-        /* ----------------------------------------------------
-           3. GESTOR DE SUBIDA DE NUEVOS RECUERDOS
-           ---------------------------------------------------- */
-        let uploadedBase64 = null;
-
-        function openAddModal() {
-            document.getElementById('add-modal').classList.add('active');
-        }
-
-        function closeAddModal(e) {
-            if (!e || e.target.id === 'add-modal' || e.target.closest('button')) {
-                document.getElementById('add-modal').classList.remove('active');
-            }
-        }
-
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('file-name-preview').innerText = file.name;
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    uploadedBase64 = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function saveNewMemory(e) {
-            e.preventDefault();
-            const title = document.getElementById('new-title').value.trim();
-            const date = document.getElementById('new-date').value.trim();
-            const category = document.getElementById('new-category').value;
-            const urlInput = document.getElementById('new-img-url').value.trim();
-            const desc = document.getElementById('new-desc').value.trim();
-
-            const image = uploadedBase64 || urlInput || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80';
-
-            const newMem = {
-                id: 'm_' + Date.now(),
-                title,
-                date,
-                category,
-                image,
-                desc,
-                likes: 1
-            };
-
-            memories.unshift(newMem);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(memories));
-            renderMemories();
-
-            document.getElementById('add-memory-form').reset();
-            uploadedBase64 = null;
-            document.getElementById('file-name-preview').innerText = 'Sin archivo seleccionado';
-            closeAddModal();
-            switchView('gallery');
         }
 
         /* ----------------------------------------------------
